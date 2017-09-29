@@ -49,7 +49,7 @@ class Model:
 
 class SpeechModel(Model):
     def __init__(self):
-        Model.__init__(self, "speech_model.json", "/home/sophie/trump.txt",
+        Model.__init__(self, "speech_model.json", "~/trump.txt",
                        LongTextGenerator())
 
 class TweetModel(Model):
