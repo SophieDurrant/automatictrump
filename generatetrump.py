@@ -1,7 +1,7 @@
  #!/usr/bin/env python3
 import markovify
 from os.path import isfile
-from get_trumpbot_resources import get_tweet_resource, get_speech_resource
+from get_trumpbot_resources import *
 
 default_state_size = 2
 
@@ -53,11 +53,11 @@ class Model:
 
 class SpeechModel(Model):
     def __init__(self):
-        Model.__init__(self, "speech_model.json", get_speech_resource(),
+        Model.__init__(self, get_speech_json(), get_speech_resource(),
                        LongTextGenerator())
 
 class TweetModel(Model):
     def __init__(self):
-        Model.__init__(self, "tweet_model.json",
+        Model.__init__(self, get_tweet_json(),
                        get_tweet_resource(),
                        TweetGenerator())
