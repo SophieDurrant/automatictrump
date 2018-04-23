@@ -1,7 +1,11 @@
  #!/usr/bin/env python3
 import markovify
-import requests
 from os.path import isfile
+from get_trumpbot_resources import get_tweet_resource, get_speech_resource
+
+default_state_size = 2
+
+text_model = markovify.Text
 
 class Generator:
     def generate(self, resource):
@@ -10,20 +14,20 @@ class Generator:
 class TweetGenerator(Generator):
     def generate(self, resource):
         trump_tweets = ""
-        r = requests.get(resource)
-        for line in r.iter_lines():
-            fields = line.decode(r.encoding).split(",")
-            if len(fields) >= 3 and fields[1] == "Twitter for Android":
-                trump_tweets = trump_tweets + fields[2] + "\n\n"
+        with open(resource) as f:
+            for line in f:
+                fields = line.split(",")
+                if len(fields) >= 3:
+                    trump_tweets = trump_tweets + fields[1] + "\n\n"
             
-        return markovify.Text(trump_tweets, state_size = 3)
+        return text_model(trump_tweets, state_size = default_state_size)
 
 class LongTextGenerator(Generator):
     def generate(self, resource):
         with open(resource) as f:
             trump_speeches = f.read()
         
-        return markovify.Text(trump_speeches, state_size = 3)
+        return text_model(trump_speeches, state_size = default_state_size)
     
 
 class Model:
@@ -43,17 +47,17 @@ class Model:
         
         if isfile(json_file):
             with open(self.json_file) as f:
-                self.model = markovify.Text.from_chain(f.read())
+                self.model = text_model.from_chain(f.read())
         else:
             self.regenerate()
 
 class SpeechModel(Model):
     def __init__(self):
-        Model.__init__(self, "speech_model.json", "/home/sophie/trump.txt",
+        Model.__init__(self, "speech_model.json", get_speech_resource(),
                        LongTextGenerator())
 
 class TweetModel(Model):
     def __init__(self):
         Model.__init__(self, "tweet_model.json",
-                       "https://raw.githubusercontent.com/bpb27/political_twitter_archive/master/realdonaldtrump/realdonaldtrump.csv",
+                       get_tweet_resource(),
                        TweetGenerator())
